@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html ng-app="caveApp">
+<head>
+<meta charset="UTF-8">
+<title>The Beauty Cave</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+body{font-family:Arial;background:#fdeef7;padding:20px;}
+.header{display:flex;justify-content:center;align-items:center;gap:15px;margin-bottom:20px;}
+.shop-name{font-family:'Great Vibes',cursive;font-size:52px;color:#ad1457;}
+.search-box{padding:8px 12px;border-radius:20px;border:1px solid #ccc;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.card{background:#fff;padding:15px;border-radius:10px;text-align:center;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);cursor:pointer;}
+.card img{width:100%;height:180px;object-fit:cover;border-radius:8px;}
+.price{color:#ad1457;font-weight:bold;}
+button{background:#ad1457;color:#fff;border:none;padding:8px 15px;border-radius:6px;cursor:pointer;margin:5px;}
+.back{background:#6a1b9a;}
+.payment-box{max-width:500px;margin:auto;background:#fff;padding:25px;border-radius:12px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);}
+.payment-box input{width:100%;padding:10px;margin:8px 0;}
+.success{text-align:center;color:#2e7d32;}
+</style>
+</head>
+
+<body ng-controller="CaveController">
+
+<div class="header">
+  <div class="shop-name">The Beautiful Cave</div>
+  <i class="fa fa-search"></i>
+  <input class="search-box" ng-model="searchCategory" placeholder="Search category">
+</div>
+
+<!-- CATEGORIES -->
+<div ng-if="view==='categories'" class="grid">
+
+  <div class="card" ng-click="openCategory('tops')">
+    <img src="https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb">
+    <h3>Stylish Tops</h3>
+  </div>
+
+  <div class="card" ng-click="openCategory('jeans')">
+    <img src="https://images.unsplash.com/photo-1542272604-787c3835535d">
+    <h3>Jeans / Pants</h3>
+  </div>
+
+  <div class="card" ng-click="openCategory('makeup')">
+    <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9">
+    <h3>Makeup Kit</h3>
+  </div>
+
+  <div class="card" ng-click="openCategory('accessories')">
+    <img src="https://images.unsplash.com/photo-1519742866993-66d3cfef4bbd">
+    <h3>Hair Accessories</h3>
+  </div>
+
+  <div class="card" ng-click="openCategory('nail')">
+    <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348">
+    <h3>Nail Polish Kit</h3>
+  </div>
+
+  <div class="card" ng-click="openCategory('shoes')">
+    <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772">
+    <h3>Shoes for Girls</h3>
+  </div>
+
+</div>
+
+<!-- PRODUCTS -->
+<div ng-if="view==='products'">
+  <button class="back" ng-click="back()">← Back</button>
+  <button ng-click="viewCart()">Cart ({{cart.length}})</button>
+
+  <div class="grid">
+    <div class="card" ng-repeat="p in products">
+      <img ng-src="{{p.image}}">
+      <h3>{{p.name}}</h3>
+      <p class="price">₹{{p.price}}</p>
+      <button ng-click="addToCart(p)">Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+<!-- CART -->
+<div ng-if="view==='cart'" class="payment-box">
+  <h2>Your Cart</h2>
+  <div ng-repeat="c in cart">{{c.name}} – ₹{{c.price}}</div>
+  <h3>Total: ₹{{total()}}</h3>
+  <button ng-click="goPayment()">Proceed to Payment</button>
+  <button class="back" ng-click="backToProducts()">Back</button>
+</div>
+
+<!-- PAYMENT -->
+<div ng-if="view==='payment'" class="payment-box">
+  <h2>Payment Details</h2>
+  <input placeholder="Cardholder Name">
+  <input placeholder="Card Number">
+  <input placeholder="Expiry Date (MM/YY)">
+  <input placeholder="CVV">
+  <button ng-click="pay()">Pay ₹{{total()}}</button>
+</div>
+
+<!-- SUCCESS -->
+<div ng-if="view==='success'" class="payment-box success">
+  <h2>Payment Successful 🎉</h2>
+  <p>Thank you for shopping at <b>The Beautiful Cave</b></p>
+  <button ng-click="reset()">Back to Home</button>
+</div>
+
+<script>
+angular.module("caveApp",[]).controller("CaveController",function($scope){
+
+$scope.view="categories";
+$scope.cart=[];
+
+const data={
+  tops:[
+    {name:"Casual Top",price:899,image:"https://images.unsplash.com/photo-1512436991641-6745cdb1723f"},
+    {name:"Floral Top",price:1099,image:"https://images.unsplash.com/photo-1545291730-faff8ca1d4b0"},
+    {name:"Party Wear Top",price:1299,image:"https://images.unsplash.com/photo-1520974735194-8d37b0c43c0c"},
+    {name:"Sleeveless Top",price:799,image:"https://images.unsplash.com/photo-1503342394128-c104d54dba01"},
+    {name:"Pink Stylish Top",price:999,image:"https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb"}
+  ],
+  jeans:[
+    {name:"Blue Jeans",price:1499,image:"https://images.unsplash.com/photo-1542272604-787c3835535d"},
+    {name:"Black Jeans",price:1599,image:"https://images.unsplash.com/photo-1523381294911-8d3cead13475"},
+    {name:"High Waist Jeans",price:1699,image:"https://images.unsplash.com/photo-1516762689617-e1cffcef479d"},
+    {name:"Cargo Jeans",price:1399,image:"https://images.unsplash.com/photo-1514996937319-344454492b37"},
+    {name:"Casual Pants",price:1299,image:"https://images.unsplash.com/photo-1506629905607-45b94b07f47f"}
+  ],
+  makeup:[
+    {name:"Makeup Kit Pro",price:1999,image:"https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9"},
+    {name:"Compact Set",price:999,image:"https://images.unsplash.com/photo-1583241800698-e8ab01830f47"},
+    {name:"Bridal Kit",price:2499,image:"https://images.unsplash.com/photo-1596704017254-9b121068fb31"},
+    {name:"Daily Use Kit",price:899,image:"https://images.unsplash.com/photo-1600180758890-6b94519a8ba6"},
+    {name:"Premium Kit",price:2999,image:"https://images.unsplash.com/photo-1598449426314-8b02525e8733"}
+  ],
+  accessories:[
+    {name:"Hair Bands",price:299,image:"https://images.unsplash.com/photo-1519742866993-66d3cfef4bbd"},
+    {name:"Scrunchies",price:249,image:"https://images.unsplash.com/photo-1618354691373-1c47cbe6d80b"},
+    {name:"Hair Clips",price:199,image:"https://images.unsplash.com/photo-1598970434795-0c54fe7c0642"},
+    {name:"Head Band",price:349,image:"https://images.unsplash.com/photo-1600180758890-6b94519a8ba6"},
+    {name:"Curly Hair Band",price:399,image:"https://images.unsplash.com/photo-1519742866993-66d3cfef4bbd"}
+  ],
+  nail:[
+    {name:"Nail Polish Combo",price:499,image:"https://images.unsplash.com/photo-1596462502278-27bfdc403348"},
+    {name:"Glossy Kit",price:599,image:"https://images.unsplash.com/photo-1608571423902-eed4a5ad8108"},
+    {name:"Matte Set",price:699,image:"https://images.unsplash.com/photo-1589782182703-1f5eabf36e7b"},
+    {name:"Bridal Nail Kit",price:899,image:"https://images.unsplash.com/photo-1611078489935-0cb964de46c5"},
+    {name:"Color Pop Kit",price:549,image:"https://images.unsplash.com/photo-1596462502278-27bfdc403348"}
+  ],
+  shoes:[
+    {name:"Girls Sneakers",price:1999,image:"https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77"},
+    {name:"Casual Shoes",price:1799,image:"https://images.unsplash.com/photo-1549298916-b41d501d3772"},
+    {name:"Heels",price:2299,image:"https://images.unsplash.com/photo-1528701800489-20be3c6c0ec4"},
+    {name:"Sandals",price:1499,image:"https://images.unsplash.com/photo-1584735175097-719d848f844f"},
+    {name:"Party Wear Shoes",price:2599,image:"https://images.unsplash.com/photo-1519741497674-611481863552"}
+  ]
+};
+
+$scope.openCategory=cat=>{$scope.products=data[cat];$scope.view="products";}
+$scope.addToCart=i=>$scope.cart.push(i);
+$scope.viewCart=()=> $scope.view="cart";
+$scope.goPayment=()=> $scope.view="payment";
+$scope.pay=()=> $scope.view="success";
+$scope.total=()=> $scope.cart.reduce((s,i)=>s+i.price,0);
+$scope.reset=()=>{$scope.cart=[];$scope.view="categories";}
+$scope.back=()=> $scope.view="categories";
+$scope.backToProducts=()=> $scope.view="products";
+
+});
+</script>
+
+</body>
+</html>
